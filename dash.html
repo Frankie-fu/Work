@@ -11,22 +11,34 @@
     <script src='https://cdnjs.cloudflare.com/ajax/libs/axios/0.21.1/axios.min.js'></script>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.5.0/Chart.min.js"></script>
 
     <style>
       .card{
         height:500px;
+      }
+      .card-title{
+        font-family:"Copperplate";
+      }
+      #legend{
+        float:left;
+        display:inline;
+        color:white;
+        padding:10px;
+        margin:5px;
       }
     </style>
   </head>
 
   <body>
     <nav>
-      <div class="nav-wrapper red darken-2 white-text">
-        <a href="#" class="brand-logo" style='padding-left:10px;'>Dashboard</a>
+      <div class="nav-wrapper #ed646a">
+        <a href="#" class="brand-logo" style='padding-left:10px;'>COVID-19 Dashboard</a>
         <ul id="nav-mobile" class="right hide-on-med-and-down">
-          <li><a href="sass.html">Sass</a></li>
-          <li><a href="badges.html">Components</a></li>
-          <li><a href="collapsible.html">JavaScript</a></li>
+          <li><a href="#">Top 10 List</a></li>
+          <li><a href="#">Map</a></li>
+          <li><a href="#">Bar Graph</a></li>
+          <li><a href="#">Pie Chart</a></li>
         </ul>
       </div>
     </nav>
@@ -35,7 +47,7 @@
       <div class="col s12 m6">
         <div class="card">
           <div class="card-content">
-            <span class="card-title">Top 10 COVID Death</span>
+            <span class="card-title">TOP 10 COVID DEATH</span>
             <div id = 'output'></div>
           </div>
         </div>
@@ -45,32 +57,32 @@
       <div class="col s12 m6">
         <div class="card">
           <div class="card-content">
-            <span class="card-title">Map</span>
-            <div id='map' style="width:100%; height:63%;"></div>
+            <span class="card-title">COVID MAP</span>
+            <div id='map' style="width:100%; height:80%;"></div>
           </div>
         </div>
       </div> <!-- end of column -->
     <div> <!-- end of 2nd row -->
-      <div class="row">
-        <div class="col s12 m6">
-          <div class="card">
-            <div class="card-content">
-              <span class="card-title">Card 3</span>
-              <div></div>
-            </div>
+    <div class="row">
+      <div class="col s12 m6">
+        <div class="card">
+          <div class="card-content">
+            <span class="card-title">COVID BAR GRAPH</span>
+            <canvas id="bar-chart" width="100%" height="75%"></canvas>
           </div>
-        </div> <!-- end of column -->
-      <div> <!-- end of 3rd row -->
-        <div class="row">
-          <div class="col s12 m6">
-            <div class="card">
-              <div class="card-content">
-                <span class="card-title">Card 4</span>
-                <div></div>
-              </div>
-            </div>
-          </div> <!-- end of column -->
-        <div> <!-- end of 4th row -->
+        </div>
+      </div> <!-- end of column -->
+    <div> <!-- end of 3rd row -->
+    <div class="row">
+      <div class="col s12 m6">
+        <div class="card">
+          <div class="card-content">
+            <span class="card-title">COVID PIE CHART</span>
+            <canvas id="pie-chart" width="100%" height="75%"></canvas>
+          </div>
+        </div>
+      </div> <!-- end of column -->
+    <div> <!-- end of 4th row -->
 
   </body>
 
@@ -81,9 +93,62 @@
         console.log(response.data.data);
         buildList(response.data.data);
         mapAlgo(response.data.data);
+        barGraph(response.data.data);
+        pieChart();
       })
 
     //mapIt();
+
+    function pieChart(){
+      new Chart(document.getElementById("pie-chart"), {
+          type: 'pie',
+          data: {
+            labels: ["Africa", "Asia", "Europe", "Latin America", "North America"],
+            datasets: [{
+              label: "Population (millions)",
+              backgroundColor: ["#3e95cd", "#8e5ea2","#3cba9f","#e8c3b9","#c45850"],
+              data: [2478,5267,734,784,433]
+            }]
+          },
+          options: {
+            title: {
+              display: true,
+              text: 'Predicted world population (millions) in 2050'
+            }
+          }
+      });
+    }
+
+    function barGraph(cdata){
+      // Bar chart
+
+      var labarray = [];
+      var dataarray = [];
+      for (i=0;i<10;i++){
+        labarray.push(cdata[i].location);
+        dataarray.push(cdata[i].dead);
+      }
+      new Chart(document.getElementById("bar-chart"), {
+          type: 'bar',
+          data: {
+            labels: labarray,
+            datasets: [
+              {
+                label: "COVID Deaths",
+                backgroundColor: ["#ff0000", "#ff7b00","#ecf716","#78f716","#40de87","#30e3e0","#407de6","#8b50de","#ad26bf","#f01fe2"],
+                data: dataarray
+              }
+            ]
+          },
+          options: {
+            legend: { display: false },
+            title: {
+              display: true,
+              text: 'Top 10 deaths from COVID-19'
+            }
+          }
+      });
+    }
 
     function mapAlgo(response){
       var map = L.map('map').setView([20, 0], 2);
@@ -96,7 +161,7 @@
         var lat = response[i].latitude;
         var lon = response[i].longitude;
         var rad = parseInt(response[i].dead) * 2;
-        var popup = "<h6>" + response[i].location + "</h6><p>" + "Death: " + response[i].dead + "</p>";
+        var popup = "<h6>" + response[i].location + "</h6><p>" + "Confirmed Cases: " + response[i].confirmed + "</p>" + "<p>" + "Death: " + response[i].dead + "</p>";
         if (i < 10) {
           var c = 'red';
         }
