@@ -90,26 +90,39 @@
         buildList(response.data.data);
         mapAlgo(response.data.data);
         barGraph(response.data.data);
-        pieChart();
+        pieChart(response.data.data);
       })
 
     //mapIt();
 
-    function pieChart(){
+    function pieChart(cdata){
+
+      var total = 0;
+      for (i=3;i<cdata.length;i++){
+        total = total + parseInt(cdata[i].dead);
+      }
+
+      var entire = total + parseInt(cdata[0].dead) + parseInt(cdata[1].dead) + parseInt(cdata[2].dead)
+      var percents = []
+      for (i=0;i<3;i++){
+        percents.push((parseInt(cdata[i].dead)/entire*100).toFixed(2))
+      }
+      percents.push((total/entire*100).toFixed(2))
+
       new Chart(document.getElementById("pie-chart"), {
           type: 'pie',
           data: {
-            labels: ["Africa", "Asia", "Europe", "Latin America", "North America"],
+            labels: [cdata[0].location + " (" + cdata[0].dead + " deaths)", cdata[1].location + " (" + cdata[0].dead + " deaths)", cdata[1].location + " (" + cdata[2].dead + " deaths)", "Rest of the world" + " (" + total + " deaths)"],
             datasets: [{
-              label: "Population (millions)",
+              label: "COVID Deaths",
               backgroundColor: ["#3e95cd", "#8e5ea2","#3cba9f","#e8c3b9","#c45850"],
-              data: [2478,5267,734,784,433]
+              data: percents
             }]
           },
           options: {
             title: {
               display: true,
-              text: 'Predicted world population (millions) in 2050'
+              text: 'Comparing Top 3 COVID Deaths and Rest of the World (in percentage)'
             }
           }
       });
